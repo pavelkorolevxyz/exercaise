@@ -1,0 +1,36 @@
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md) 20px;
+  border: 2px solid transparent;
+  transition: border-color var(--duration-fast);
+  color: var(--white);
+  text-align: left;
+  width: 100%;
+}
+
+.interactive {
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .interactive:hover {
+    border-color: var(--lime);
+  }
+}
+
+.active {
+  border-color: var(--lime);
+  background: var(--lime-g);
+}
+
+/* Fullscreen TV mode */
+:global(:fullscreen) .card {
+  padding: 20px 24px;
+  border-radius: 16px;
+  border-width: 3px;
+}
+
+:global(:fullscreen) .active {
+  border-width: 3px;
+}

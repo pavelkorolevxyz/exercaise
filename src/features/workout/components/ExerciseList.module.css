@@ -1,0 +1,148 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: 0 20px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Left indicator */
+.indicator {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.num {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--text-dim);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--border);
+}
+
+.numCurrent {
+  background: var(--lime);
+  color: var(--bg);
+}
+
+.numDone {
+  background: var(--lime);
+  color: var(--bg);
+}
+
+/* Body */
+.body {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: var(--space-xs);
+}
+
+/* Done exercises: muted */
+.itemDone {
+  opacity: 0.5;
+}
+
+/* Details row */
+.details {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.params {
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--text-sec);
+  transition: color var(--duration-fast);
+}
+
+.meta {
+  flex: 1;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  color: var(--text-sec);
+  font-weight: 700;
+  transition: color var(--duration-fast);
+}
+
+.tempo {
+  flex: 1;
+  text-align: right;
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--text-sec);
+  transition: color var(--duration-fast);
+}
+
+@media (hover: hover) {
+  .params:hover,
+  .meta:hover,
+  .tempo:hover {
+    color: var(--white);
+  }
+}
+
+/* === Fullscreen TV mode (≈2×) === */
+:global(:fullscreen) .list {
+  gap: 12px;
+  padding: 0 28px;
+}
+
+:global(:fullscreen) .row {
+  gap: 20px;
+}
+
+:global(:fullscreen) .num {
+  width: 48px;
+  height: 48px;
+  font-size: 24px;
+}
+
+:global(:fullscreen) .indicator {
+  width: 48px;
+  height: 48px;
+}
+
+:global(:fullscreen) .title {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+:global(:fullscreen) .params {
+  font-size: 24px;
+}
+
+:global(:fullscreen) .meta {
+  font-size: 24px;
+}
+
+:global(:fullscreen) .tempo {
+  font-size: 24px;
+}

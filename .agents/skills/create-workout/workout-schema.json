@@ -1,0 +1,76 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "WorkoutDto",
+    "description": "Формат JSON-файла тренировки для Exercaise — таймер упражнений с темпом, подходами и отдыхом",
+    "type": "object",
+    "required": ["title", "exercises"],
+    "additionalProperties": false,
+    "properties": {
+        "title": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Название тренировки"
+        },
+        "exercises": {
+            "type": "array",
+            "minItems": 1,
+            "description": "Список упражнений",
+            "items": {
+                "type": "object",
+                "required": ["title", "repeat_count", "set_count"],
+                "additionalProperties": false,
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Название упражнения"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Подробная инструкция по выполнению"
+                    },
+                    "repeat_count": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "description": "Количество повторений в подходе (1 для упражнений на время)"
+                    },
+                    "set_count": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "description": "Количество подходов"
+                    },
+                    "rest_seconds": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "default": 60,
+                        "description": "Отдых между подходами в секундах"
+                    },
+                    "tempo": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "to": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "default": 1,
+                                "description": "Секунды на выполнение движения (фаза туда)"
+                            },
+                            "hold": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "default": 0,
+                                "description": "Секунды удержания (или длительность упражнения на время)"
+                            },
+                            "from": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "default": 1,
+                                "description": "Секунды на возврат (фаза обратно)"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

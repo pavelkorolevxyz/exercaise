@@ -1,0 +1,157 @@
+@import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800;900&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --bg: #0f0f12;
+  --surface: #1a1a22;
+  --surface-2: #222230;
+  --lime: #c8ff00;
+  --lime-g: rgba(200, 255, 0, 0.12);
+  --coral: #ff5050;
+  --coral-g: rgba(255, 80, 80, 0.12);
+  --violet: #9966ff;
+  --violet-g: rgba(153, 102, 255, 0.1);
+  --white: #f0f0f4;
+  --text-sec: #6a6a80;
+  --text-dim: #3a3a48;
+  --border: #28283a;
+
+  --font-display: 'Unbounded', sans-serif;
+  --font-body: 'Manrope', sans-serif;
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 40px;
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 28px;
+
+  /* Font sizes */
+  --text-xs: 10px;
+  --text-sm: 13px;
+  --text-base: 15px;
+  --text-lg: 20px;
+  --text-xl: 28px;
+  --text-2xl: 36px;
+  --text-hero: 48px;
+
+  /* Transitions */
+  --duration-fast: 0.15s;
+  --duration-normal: 0.3s;
+
+  /* Panel layout */
+  --panel-padding: 20px;
+  --toolbar-height: 56px;
+  --tap-target: 48px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-display);
+  background: var(--bg);
+  color: var(--white);
+  height: 100dvh;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  height: 100dvh;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* Browser fullscreen: hide workout list sidebar */
+:fullscreen [data-layout="app"] > *:first-child {
+  display: none;
+}
+
+/* Browser fullscreen: exercise panel — enlarged for TV */
+:fullscreen [data-layout="app"] [data-panel="exercises"] {
+  width: 500px;
+  font-size: 28px;
+}
+
+:fullscreen [data-layout="app"] [data-panel="exercises"] [data-panel-header] {
+  display: none;
+}
+
+:fullscreen [data-layout="app"] [data-panel="exercises"] [data-panel-stats] {
+  display: none;
+}
+
+:fullscreen [data-layout="app"] [data-panel="exercises"] [data-panel-scroll] {
+  padding-top: 28px;
+  padding-bottom: 28px;
+}
+
+/* === Responsive: medium — hide workout list, keep 2 columns === */
+@media (max-width: 1199px) and (min-width: 800px) {
+  /* Hide workout list when viewing workout details or playing */
+  [data-layout="app"][data-route="workout"] > *:first-child,
+  [data-layout="app"][data-route="play"] > *:first-child {
+    display: none;
+  }
+
+  /* Show back button when workout list is hidden */
+  [data-route="workout"] [data-back],
+  [data-route="play"] [data-back] {
+    display: flex;
+  }
+}
+
+/* === Responsive: mobile layout === */
+@media (max-width: 799px) {
+  /* Stack panels vertically */
+  [data-layout="app"] {
+    flex-direction: column;
+  }
+
+  [data-layout="app"] > *:first-child {
+    width: 100%;
+    max-height: 100%;
+    border-right: none;
+    border-bottom: 2px solid var(--border);
+  }
+
+  /* Hide workout list when viewing workout details or playing */
+  [data-layout="app"][data-route="workout"] > *:first-child,
+  [data-layout="app"][data-route="play"] > *:first-child {
+    display: none;
+  }
+
+  /* During play, exercise panel becomes a slide-out drawer */
+  [data-route="play"] [data-panel="exercises"] {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 85vw;
+    max-width: 400px;
+    max-height: none;
+    height: 100dvh;
+    z-index: 100;
+    transform: translateX(-100%);
+    border-right: 2px solid var(--border);
+    border-bottom: none;
+    background: var(--bg);
+  }
+
+  [data-route="play"] [data-panel="exercises"][data-drawer-open] {
+    transform: translateX(0);
+  }
+}
+

@@ -1,0 +1,23 @@
+.modalInput {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  background: var(--bg);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--white);
+  padding: 12px;
+  resize: vertical;
+  min-height: 100px;
+  width: 100%;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color var(--duration-fast);
+}
+
+.modalInput:focus {
+  border-color: var(--lime);
+}
+
+.modalInput::placeholder {
+  color: var(--text-dim);
+}

@@ -1,0 +1,21 @@
+.container {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.text {
+  display: inline-block;
+}
+
+.scrolling {
+  animation: marquee var(--marquee-duration, 5s) linear infinite alternate;
+}
+
+@keyframes marquee {
+  0%, 15% {
+    transform: translateX(0);
+  }
+  85%, 100% {
+    transform: translateX(var(--marquee-offset));
+  }
+}

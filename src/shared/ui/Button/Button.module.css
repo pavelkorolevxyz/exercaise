@@ -1,0 +1,93 @@
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  border: none;
+  cursor: pointer;
+  transition: all var(--duration-fast);
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* Variants */
+.primary {
+  background: var(--lime);
+  color: var(--bg);
+}
+
+@media (hover: hover) {
+  .primary:hover {
+    transform: scale(1.02);
+  }
+}
+
+.secondary {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  color: var(--text-sec);
+}
+
+@media (hover: hover) {
+  .secondary:hover {
+    border-color: var(--lime);
+    color: var(--lime);
+  }
+}
+
+.ghost {
+  background: none;
+  border: 2px solid var(--border);
+  color: var(--text-dim);
+}
+
+@media (hover: hover) {
+  .ghost:hover {
+    border-color: var(--lime);
+    color: var(--lime);
+  }
+}
+
+.dashed {
+  background: var(--surface);
+  border: 2px dashed var(--border);
+  color: var(--text-sec);
+}
+
+@media (hover: hover) {
+  .dashed:hover {
+    border-color: var(--lime);
+    color: var(--lime);
+  }
+}
+
+/* Sizes */
+.sm {
+  padding: 10px 20px;
+  font-size: var(--text-sm);
+  border-radius: var(--radius-md);
+}
+
+.md {
+  padding: 14px 24px;
+  font-size: var(--text-base);
+  border-radius: var(--radius-lg);
+}
+
+.lg {
+  padding: 20px 48px;
+  font-size: 22px;
+  border-radius: var(--radius-xl);
+}
+
+@media (hover: hover) {
+  .lg:hover {
+    transform: scale(1.06);
+  }
+}
+
+/* Full width */
+.fullWidth {
+  width: 100%;
+}

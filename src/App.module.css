@@ -1,0 +1,202 @@
+.app {
+  display: flex;
+  height: 100dvh;
+}
+
+
+/* Placeholder for empty states */
+.placeholder {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+}
+
+.placeholderIcon {
+  opacity: 0.3;
+  color: var(--text-dim);
+}
+
+.placeholderText {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--text-dim);
+}
+
+/* Main area placeholder when no player */
+.mainArea {
+  flex: 1;
+  display: flex;
+  min-width: 0;
+}
+
+/* === Col 2: Exercise panel === */
+.exercisePanel {
+  width: 400px;
+  flex-shrink: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-right: 2px solid var(--border);
+}
+
+.epHeader {
+  padding: 28px 20px 20px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-height: 56px;
+}
+
+.epBack {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 2px solid transparent;
+  color: var(--text-sec);
+  cursor: pointer;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  transition: all var(--duration-fast);
+  flex-shrink: 0;
+}
+
+@media (hover: hover) {
+  .epBack:hover {
+    color: var(--white);
+    border-color: var(--border);
+  }
+}
+
+.epBack:active {
+  color: var(--white);
+  border-color: var(--border);
+}
+
+.epBackdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 99;
+}
+
+.epAction {
+  flex-shrink: 0;
+  background: none;
+  border: 2px solid transparent;
+  color: var(--text-sec);
+  cursor: pointer;
+  width: 48px;
+  height: 48px;
+  margin-left: -8px;
+  border-radius: var(--radius-md);
+  transition: all var(--duration-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (hover: hover) {
+  .epAction:hover {
+    color: var(--lime);
+    border-color: var(--lime);
+  }
+
+  .epActionDanger:hover {
+    color: var(--coral);
+    border-color: var(--coral);
+  }
+}
+
+.epAction:active {
+  color: var(--lime);
+  border-color: var(--lime);
+}
+
+.epActionDanger:active {
+  color: var(--coral);
+  border-color: var(--coral);
+}
+
+.epTitle {
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -1px;
+}
+
+.epStats {
+  padding: 0 20px 12px;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-sec);
+  flex-shrink: 0;
+}
+
+.epScroll {
+  flex: 1;
+  overflow-y: auto;
+  border-top: 2px solid transparent;
+  border-bottom: 2px solid transparent;
+  transition: border-color var(--duration-fast);
+}
+
+.epScroll[data-scroll-top] {
+  border-top-color: var(--border);
+}
+
+.epScroll[data-scroll-bottom] {
+  border-bottom-color: var(--border);
+}
+
+.epFooter {
+  display: none;
+}
+
+
+@media (max-width: 799px) {
+  .exercisePanel {
+    width: 100%;
+    border-right: none;
+    border-bottom: none;
+    height: 100%;
+    max-height: none;
+  }
+
+  .epFooter {
+    display: block;
+    padding: 16px var(--panel-padding) var(--panel-padding);
+    flex-shrink: 0;
+  }
+
+  .mainArea {
+    display: none;
+  }
+
+  .epBack {
+    display: flex;
+  }
+
+  .epBackdrop {
+    display: block;
+  }
+
+  .epHeader {
+    padding: 8px var(--panel-padding);
+    min-height: var(--toolbar-height);
+  }
+
+  .epTitle {
+    font-size: 20px;
+    min-width: 0;
+  }
+}
