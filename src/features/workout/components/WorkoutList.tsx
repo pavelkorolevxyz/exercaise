@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router';
-import { Info, Sparkles } from 'lucide-react';
+import { Info, Sparkles, BarChart3 } from 'lucide-react';
 import { useWorkoutStore } from '../store/workoutStore';
 import { estimateDurationMinutes } from '../model/duration';
 import { Button, Card, Modal, ModalHeader, ModalTitle, ModalBody, ModalActions } from '../../../shared/ui';
@@ -8,6 +8,7 @@ import { useScrollIndicators } from '../../../shared/hooks/useScrollIndicators';
 import type { Workout } from '../model/types';
 import { CreateWorkoutModal } from './CreateWorkoutModal';
 import { ImportModal } from './ImportModal';
+import { StatsDashboard } from './StatsDashboard';
 import styles from './WorkoutList.module.css';
 
 function WorkoutCard({
@@ -44,6 +45,7 @@ export function WorkoutList() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
+  const [showHeatmap, setShowHeatmap] = useState(false);
   const scrollRef = useScrollIndicators();
 
   const handleImport = (json: string) => {
@@ -58,13 +60,22 @@ export function WorkoutList() {
         <div className={styles.logo}>
           exerc<span>ai</span>se
         </div>
-        <button
-          className={styles.headerAction}
-          aria-label="О приложении"
-          onClick={() => setShowInfoModal(true)}
-        >
-          <Info size={16} />
-        </button>
+        <div className={styles.headerActions}>
+          <button
+            className={styles.headerAction}
+            aria-label="Статистика"
+            onClick={() => setShowHeatmap(true)}
+          >
+            <BarChart3 size={16} />
+          </button>
+          <button
+            className={styles.headerAction}
+            aria-label="О приложении"
+            onClick={() => setShowInfoModal(true)}
+          >
+            <Info size={16} />
+          </button>
+        </div>
       </div>
 
       <div className={styles.scroll} ref={scrollRef}>
@@ -134,6 +145,18 @@ export function WorkoutList() {
         </ModalBody>
         <ModalActions>
           <Button onClick={() => setShowInfoModal(false)}>Закрыть</Button>
+        </ModalActions>
+      </Modal>
+
+      <Modal open={showHeatmap} onClose={() => setShowHeatmap(false)} size="wide">
+        <ModalHeader>
+          <ModalTitle>Статистика</ModalTitle>
+        </ModalHeader>
+        <ModalBody>
+          <StatsDashboard />
+        </ModalBody>
+        <ModalActions>
+          <Button onClick={() => setShowHeatmap(false)}>Закрыть</Button>
         </ModalActions>
       </Modal>
 

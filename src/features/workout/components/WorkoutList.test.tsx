@@ -200,6 +200,15 @@ describe('WorkoutList', () => {
     expect(textarea2.value).toBe('');
   });
 
+  it('opens stats modal with heatmap on stats button click', () => {
+    renderWithRouter();
+    expect(screen.queryByText('Статистика', { selector: '[class*="title"]' })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByLabelText('Статистика'));
+    expect(screen.getByText('Статистика', { selector: '[class*="title"]' })).toBeInTheDocument();
+    expect(document.querySelector('[class*="heatmap"]')).toBeInTheDocument();
+  });
+
   it('highlights active workout based on URL', () => {
     useWorkoutStore.setState({ workouts: [workout1, workout2] });
     renderWithRouter('/workout/w1');

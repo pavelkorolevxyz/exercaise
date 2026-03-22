@@ -1208,6 +1208,177 @@ describe('usePlayerState', () => {
     expect(sound.exerciseStart).not.toHaveBeenCalled();
   });
 
+  // ─── elapsedSecondsRef tests ─────────────────────────────────────
+
+  it('elapsedSecondsRef starts at 0', () => {
+    const { result } = renderHook(() => usePlayerState(simpleWorkout));
+    expect(result.current.elapsedSecondsRef.current).toBe(0);
+  });
+
+  it('elapsedSecondsRef increments each second during exercise', () => {
+    const longTempo: Workout = {
+      id: 'el',
+      title: 'Elapsed',
+      exercises: [{
+        title: 'Ex',
+        repeatCount: 1,
+        setCount: 1,
+        restSeconds: 0,
+        tempo: { to: 5, hold: 0, from: 1 },
+      }],
+    };
+    const { result } = renderHook(() => usePlayerState(longTempo));
+
+    act(() => { result.current.actions.start(); });
+    advancePastStart();
+
+    const before = result.current.elapsedSecondsRef.current;
+    advanceAndFlush(1000);
+    expect(result.current.elapsedSecondsRef.current).toBe(before + 1);
+    advanceAndFlush(1000);
+    expect(result.current.elapsedSecondsRef.current).toBe(before + 2);
+  });
+
+  it('elapsedSecondsRef does not increment while paused', () => {
+    const longTempo: Workout = {
+      id: 'elp',
+      title: 'Elapsed Paused',
+      exercises: [{
+        title: 'Ex',
+        repeatCount: 1,
+        setCount: 1,
+        restSeconds: 0,
+        tempo: { to: 10, hold: 0, from: 1 },
+      }],
+    };
+    const { result } = renderHook(() => usePlayerState(longTempo));
+
+    act(() => { result.current.actions.start(); });
+    advancePastStart();
+
+    advanceAndFlush(2000); // 2 ticks
+    const afterTicks = result.current.elapsedSecondsRef.current;
+
+    act(() => { result.current.actions.togglePause(); });
+    advanceAndFlush(3000); // paused — no increment
+    expect(result.current.elapsedSecondsRef.current).toBe(afterTicks);
+
+    act(() => { result.current.actions.togglePause(); });
+    advanceAndFlush(1000); // resumed — 1 more tick
+    expect(result.current.elapsedSecondsRef.current).toBe(afterTicks + 1);
+  });
+
+  it('elapsedSecondsRef resets on start', () => {
+    const { result } = renderHook(() => usePlayerState(simpleWorkout));
+
+    act(() => { result.current.actions.start(); });
+    advancePastStart();
+    advanceAndFlush(1000);
+    expect(result.current.elapsedSecondsRef.current).toBeGreaterThan(0);
+
+    act(() => { result.current.actions.start(); });
+    expect(result.current.elapsedSecondsRef.current).toBe(0);
+  });
+
+  it('elapsedSecondsRef resets on startFromExercise', () => {
+    const { result } = renderHook(() => usePlayerState(multiExerciseWorkout));
+
+    act(() => { result.current.actions.start(); });
+    advancePastStart();
+    advanceAndFlush(1000);
+    expect(result.current.elapsedSecondsRef.current).toBeGreaterThan(0);
+
+    act(() => { result.current.actions.startFromExercise(1); });
+    expect(result.current.elapsedSecondsRef.current).toBe(0);
+  });
+
+  it('elapsedSecondsRef increments during rest phase', () => {
+    const { result } = renderHook(() => usePlayerState(multiSetWorkout));
+
+    act(() => { result.current.actions.start(); });
+    advancePastStart();
+
+    // Skip to rest
+    act(() => { result.current.actions.skip(); });
+    expect(result.current.state.phase).toBe('rest');
+
+    const before = result.current.elapsedSecondsRef.current;
+    advanceAndFlush(1000);
+    expect(result.current.elapsedSecondsRef.current).toBe(before + 1);
+  });
+
+  it('elapsedSecondsRef does not increment during countdown phase', () => {
+    const withDesc: Workout = {
+      id: 'cd',
+      title: 'Countdown test',
+      exercises: [{
+        title: 'Ex',
+        description: 'A long enough description to trigger reading phase for sure here',
+        repeatCount: 1,
+        setCount: 1,
+        restSeconds: 0,
+        tempo: { to: 5, hold: 0, from: 1 },
+      }],
+    };
+    const { result } = renderHook(() => usePlayerState(withDesc));
+
+    act(() => { result.current.actions.start(); });
+
+    // Should be in reading phase
+    expect(result.current.state.phase).toBe('reading');
+    const afterStart = result.current.elapsedSecondsRef.current;
+
+    // Advance through reading phase ticks
+    advanceAndFlush(2000);
+    expect(result.current.elapsedSecondsRef.current).toBe(afterStart);
+  });
+
+  // ─── sessionStartRef tests ─────────────────────────────────────
+
+  it('sessionStartRef is empty before start', () => {
+    const { result } = renderHook(() => usePlayerState(simpleWorkout));
+    expect(result.current.sessionStartRef.current).toBe('');
+  });
+
+  it('sessionStartRef is set on start', () => {
+    const { result } = renderHook(() => usePlayerState(simpleWorkout));
+    act(() => { result.current.actions.start(); });
+    expect(result.current.sessionStartRef.current).not.toBe('');
+    expect(result.current.sessionStartRef.current).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+  });
+
+  it('sessionStartRef changes on re-start', () => {
+    vi.spyOn(Date.prototype, 'toISOString')
+      .mockReturnValueOnce('2026-03-22T10:00:00.000Z')
+      .mockReturnValueOnce('2026-03-22T10:05:00.000Z');
+
+    const { result } = renderHook(() => usePlayerState(simpleWorkout));
+    act(() => { result.current.actions.start(); });
+    const first = result.current.sessionStartRef.current;
+
+    act(() => { result.current.actions.start(); });
+    const second = result.current.sessionStartRef.current;
+
+    expect(first).not.toBe(second);
+    vi.restoreAllMocks();
+  });
+
+  it('sessionStartRef resets on startFromExercise', () => {
+    vi.spyOn(Date.prototype, 'toISOString')
+      .mockReturnValueOnce('2026-03-22T10:00:00.000Z')
+      .mockReturnValueOnce('2026-03-22T10:05:00.000Z');
+
+    const { result } = renderHook(() => usePlayerState(multiExerciseWorkout));
+    act(() => { result.current.actions.start(); });
+    const first = result.current.sessionStartRef.current;
+
+    act(() => { result.current.actions.startFromExercise(1); });
+    const second = result.current.sessionStartRef.current;
+
+    expect(first).not.toBe(second);
+    vi.restoreAllMocks();
+  });
+
   it('tempoPhase passes isStatic=true for static exercises', async () => {
     const sound = await import('../../../shared/sound/SoundCue');
     const staticWorkout: Workout = {

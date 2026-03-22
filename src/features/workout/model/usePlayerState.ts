@@ -68,6 +68,9 @@ export function usePlayerState(workout: Workout) {
   const stateRef = useRef(state);
   useEffect(() => { stateRef.current = state; });
 
+  const elapsedSecondsRef = useRef(0);
+  const sessionStartRef = useRef('');
+
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const generationRef = useRef(0);
   const startTempoPhaseRef = useRef<(exIdx: number, setIdx: number, repIdx: number, tp: TempoPhase) => void>(() => {});
@@ -109,6 +112,9 @@ export function usePlayerState(workout: Workout) {
   }) => {
     timerRef.current = setInterval(() => {
       const current = stateRef.current;
+      if (current.phase === 'exercise' || current.phase === 'rest') {
+        elapsedSecondsRef.current += 1;
+      }
       if (current[config.field] <= 1) {
         clearTimer();
         setState((s) => ({ ...s, [config.field]: 0 }));
@@ -317,6 +323,8 @@ export function usePlayerState(workout: Workout) {
   // Public actions
   const startFromExercise = useCallback((fromIndex: number) => {
     clearTimer();
+    elapsedSecondsRef.current = 0;
+    sessionStartRef.current = new Date().toISOString();
     startExerciseRef.current(fromIndex, true);
   }, [clearTimer]);
 
@@ -526,6 +534,8 @@ export function usePlayerState(workout: Workout) {
     totalReps,
     totalSets,
     ringProgress,
+    elapsedSecondsRef,
+    sessionStartRef,
     tempoLabel: state.tempoPhase ? getTempoLabel(state.tempoPhase, currentExercise) : null,
     hasTempo: currentExercise ? hasTempo(currentExercise) : false,
     nextExerciseData:

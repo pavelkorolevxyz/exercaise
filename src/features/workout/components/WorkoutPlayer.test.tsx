@@ -5,6 +5,7 @@ import { WorkoutPlayer } from './WorkoutPlayer';
 import { COMPLETION_PHRASES } from './completionPhrases';
 import { useWorkoutStore } from '../store/workoutStore';
 import type { Workout } from '../model/types';
+import * as historyStorage from '../../../shared/storage/historyStorage';
 
 // ── Mocked usePlayerState (for the original rerender-dedup test) ──
 
@@ -17,6 +18,12 @@ vi.mock('../model/usePlayerState', async (importOriginal) => {
     usePlayerState: (...args: unknown[]) => mockUsePlayerState(...args),
   };
 });
+
+// ── Mock history storage ──
+
+vi.mock('../../../shared/storage/historyStorage', () => ({
+  upsertRecord: vi.fn(),
+}));
 
 // ── Mock sound cues ──
 
@@ -72,6 +79,8 @@ function mockPlayerState(overrides: Record<string, unknown> = {}) {
     ringProgress: 0.4,
     tempoLabel: null,
     hasTempo: false,
+    elapsedSecondsRef: { current: 0 },
+    sessionStartRef: { current: '2026-03-22T10:00:00.000Z' },
     actions: {
       start: vi.fn(),
       stop: vi.fn(),
@@ -404,5 +413,95 @@ describe('WorkoutPlayer', () => {
     const { actions } = mockPlayerState();
     renderPlayer('/workout/w1/play?from=1');
     expect(actions.startFromExercise).toHaveBeenCalledWith(1);
+  });
+
+  // ── History recording via tick interval ──
+
+  it('calls upsertRecord after 1s when elapsed > 0', () => {
+    vi.useFakeTimers();
+    vi.mocked(historyStorage.upsertRecord).mockClear();
+    const sessionStart = '2026-03-22T12:00:00.000Z';
+    mockPlayerState({
+      elapsedSecondsRef: { current: 5 },
+      sessionStartRef: { current: sessionStart },
+    });
+    renderPlayer();
+
+    vi.advanceTimersByTime(1000);
+    expect(historyStorage.upsertRecord).toHaveBeenCalledTimes(1);
+    const record = vi.mocked(historyStorage.upsertRecord).mock.calls[0][0];
+    expect(record.workoutId).toBe('w1');
+    expect(record.workoutTitle).toBe('Test workout');
+    expect(record.durationSeconds).toBe(5);
+    expect(record.completedAt).toBe(sessionStart);
+    vi.useRealTimers();
+  });
+
+  it('does not call upsertRecord when elapsed is 0', () => {
+    vi.useFakeTimers();
+    vi.mocked(historyStorage.upsertRecord).mockClear();
+    mockPlayerState({ elapsedSecondsRef: { current: 0 } });
+    renderPlayer();
+
+    vi.advanceTimersByTime(1000);
+    expect(historyStorage.upsertRecord).not.toHaveBeenCalled();
+    vi.useRealTimers();
+  });
+
+  it('does not call upsertRecord when sessionStart is empty', () => {
+    vi.useFakeTimers();
+    vi.mocked(historyStorage.upsertRecord).mockClear();
+    mockPlayerState({
+      elapsedSecondsRef: { current: 5 },
+      sessionStartRef: { current: '' },
+    });
+    renderPlayer();
+
+    vi.advanceTimersByTime(1000);
+    expect(historyStorage.upsertRecord).not.toHaveBeenCalled();
+    vi.useRealTimers();
+  });
+
+  it('skips upsert if elapsed unchanged since last save', () => {
+    vi.useFakeTimers();
+    vi.mocked(historyStorage.upsertRecord).mockClear();
+    const ref = { current: 10 };
+    mockPlayerState({ elapsedSecondsRef: ref });
+    renderPlayer();
+
+    vi.advanceTimersByTime(1000);
+    expect(historyStorage.upsertRecord).toHaveBeenCalledTimes(1);
+
+    // Same value — should not call again
+    vi.advanceTimersByTime(1000);
+    expect(historyStorage.upsertRecord).toHaveBeenCalledTimes(1);
+
+    // Value changes — should call
+    ref.current = 11;
+    vi.advanceTimersByTime(1000);
+    expect(historyStorage.upsertRecord).toHaveBeenCalledTimes(2);
+    vi.useRealTimers();
+  });
+
+  it('creates separate records when session changes (re-start)', () => {
+    vi.useFakeTimers();
+    vi.mocked(historyStorage.upsertRecord).mockClear();
+    const sessionRef = { current: '2026-03-22T10:00:00.000Z' };
+    const elapsedRef = { current: 5 };
+    mockPlayerState({ elapsedSecondsRef: elapsedRef, sessionStartRef: sessionRef });
+    renderPlayer();
+
+    vi.advanceTimersByTime(1000);
+    expect(historyStorage.upsertRecord).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(historyStorage.upsertRecord).mock.calls[0][0].completedAt).toBe('2026-03-22T10:00:00.000Z');
+
+    // Simulate re-start: new session, elapsed reset
+    sessionRef.current = '2026-03-22T10:05:00.000Z';
+    elapsedRef.current = 3;
+    vi.advanceTimersByTime(1000);
+    expect(historyStorage.upsertRecord).toHaveBeenCalledTimes(2);
+    expect(vi.mocked(historyStorage.upsertRecord).mock.calls[1][0].completedAt).toBe('2026-03-22T10:05:00.000Z');
+    expect(vi.mocked(historyStorage.upsertRecord).mock.calls[1][0].durationSeconds).toBe(3);
+    vi.useRealTimers();
   });
 });

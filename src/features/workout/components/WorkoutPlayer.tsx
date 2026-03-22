@@ -7,6 +7,7 @@ import type { Workout } from '../model/types';
 import { Button, IconButton } from '../../../shared/ui';
 import { pluralize } from '../../../shared/i18n/pluralize';
 import * as sound from '../../../shared/sound/SoundCue';
+import { upsertRecord } from '../../../shared/storage/historyStorage';
 import { useWakeLock } from '../../../shared/hooks/useWakeLock';
 import { COMPLETION_PHRASES } from './completionPhrases';
 import styles from './WorkoutPlayer.module.css';
@@ -69,6 +70,8 @@ function PlayerView({ workout }: { workout: Workout }) {
     ringProgress,
     tempoLabel,
     hasTempo: exerciseHasTempo,
+    elapsedSecondsRef,
+    sessionStartRef,
     actions,
   } = usePlayerState(workout);
 
@@ -117,6 +120,33 @@ function PlayerView({ workout }: { workout: Workout }) {
       setCompletionPhrase(COMPLETION_PHRASES[Math.floor(Math.random() * COMPLETION_PHRASES.length)]);
     }
   }, [state.phase]);
+
+  // Save history record on every tick (1s interval)
+  const lastSessionRef = useRef('');
+  const lastSavedRef = useRef(0);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const session = sessionStartRef.current;
+      if (!session) return;
+
+      if (session !== lastSessionRef.current) {
+        lastSessionRef.current = session;
+        lastSavedRef.current = 0;
+      }
+
+      const elapsed = elapsedSecondsRef.current;
+      if (elapsed > 0 && elapsed !== lastSavedRef.current) {
+        lastSavedRef.current = elapsed;
+        upsertRecord({
+          completedAt: session,
+          workoutId: workout.id,
+          workoutTitle: workout.title,
+          durationSeconds: elapsed,
+        });
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [workout.id, workout.title]);
 
   const phaseLabel =
     state.phase === 'rest' ? 'ОТДЫХ' : state.phase === 'exercise' ? (tempoLabel ?? 'ВЫПОЛНЯЙ').toUpperCase() : null;
